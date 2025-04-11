@@ -1,0 +1,47 @@
+# Función para leer números desde un archivo y verificar su existencia
+leer_numeros <- function(nombre_archivo) {
+  if (!file.exists(nombre_archivo)) {
+    stop("Error: El archivo no existe.")
+  }
+  # Leer el archivo y convertirlo en un vector de enteros
+  numeros <- as.integer(readLines(nombre_archivo))
+  return(numeros)
+}
+
+# Leer los números del archivo
+numeros <- leer_numeros("numeros.txt")
+
+# Calcular los estadísticos básicos
+media <- mean(numeros)
+mediana <- median(numeros)
+desviacion <- sd(numeros)
+
+# Verificar si la desviación estándar es alta
+if (desviacion > 10) {
+  mensaje_var <- "Alta variabilidad en los datos."
+  print(mensaje_var)
+} else {
+  mensaje_var <- "Variabilidad dentro del rango normal."
+}
+
+# Calcular los cuadrados usando sapply
+cuadrados <- sapply(numeros, function(x) x^2)
+
+# Escribir los resultados en resultados.txt
+archivo_salida <- "resultados.txt"
+sink(archivo_salida)
+
+cat("Resultados del análisis de datos\n")
+cat("===============================\n\n")
+cat("Media:", media, "\n")
+cat("Mediana:", mediana, "\n")
+cat("Desviación estándar:", desviacion, "\n")
+cat("Evaluación de variabilidad:", mensaje_var, "\n\n")
+
+cat("Cuadrado de cada número:\n")
+cat("-------------------------\n")
+for (i in 1:length(numeros)) {
+  cat(numeros[i], "^ 2 =", cuadrados[i], "\n")
+}
+
+sink()  # Cerrar la conexión de escritura
