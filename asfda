@@ -1,0 +1,62 @@
+---
+title: "Análisis Exploratorio del Dataset mtcars"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 2
+    theme: flatly
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(kableExtra)
+library(DT)
+library(ggplot2)
+Introducción
+El propósito de este documento es realizar un análisis exploratorio de datos utilizando el conjunto mtcars que viene incluido en R. Este análisis permite observar las relaciones entre variables y entender mejor la distribución de los datos.
+
+Exploraremos las variables principales del dataset.
+
+Visualizaremos los datos en formato de tabla estática e interactiva.
+
+Analizaremos gráficamente relaciones significativas.
+
+Personalizaremos el informe con formato profesional.
+
+Análisis de datos
+Carga del dataset
+{r}
+Copy
+Edit
+data("mtcars")
+df <- mtcars
+Tabla estática con kable
+{r}
+Copy
+Edit
+df %>%
+  head(10) %>%
+  kable(caption = "Primeras 10 filas del dataset mtcars") %>%
+  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover"))
+Tabla interactiva con DT
+{r}
+Copy
+Edit
+datatable(df, options = list(pageLength = 10), filter = "top", caption = "Tabla interactiva de mtcars")
+Gráfico de dispersión
+{r}
+Copy
+Edit
+ggplot(df, aes(x = hp, y = mpg)) +
+  geom_point(color = "steelblue") +
+  labs(title = "Relación entre Caballos de Fuerza y Consumo (mpg)", x = "Caballos de fuerza (hp)", y = "Consumo (mpg)") +
+  theme_minimal()
+Conclusiones
+Este análisis exploratorio ha permitido:
+
+Visualizar el contenido del dataset mtcars en distintos formatos.
+
+Identificar relaciones clave como la existente entre potencia del motor y el consumo.
+
+Crear un informe estructurado y visualmente atractivo en R Markdown usando herramientas como kable, DT y ggplot2.
