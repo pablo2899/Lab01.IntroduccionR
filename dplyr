@@ -1,0 +1,47 @@
+# 1. Cargar librerías y datos
+library(dplyr)
+library(tidyr)
+data(mtcars)
+df <- as.data.frame(mtcars)
+
+# 2. Selección y filtrado
+df_filtrado <- df %>%
+  select(mpg, cyl, hp, gear) %>%
+  filter(cyl > 4)
+print(df_filtrado)
+
+# 3. Ordenación y renombrado
+df_ordenado <- df_filtrado %>%
+  arrange(desc(hp)) %>%
+  rename(consumo = mpg, potencia = hp)
+print(df_ordenado)
+
+# 4. Nueva columna y agregación
+df_eficiencia <- df_ordenado %>%
+  mutate(eficiencia = consumo / potencia)
+print(df_eficiencia)
+
+df_agg <- df_eficiencia %>%
+  group_by(cyl) %>%
+  summarise(consumo_medio = mean(consumo), potencia_maxima = max(potencia), .groups = "drop")
+print(df_agg)
+
+# 5. Creación segundo dataframe y unión
+transmisiones <- data.frame(
+  gear = c(3, 4, 5),
+  tipo_transmision = c("Manual", "Automática", "Semiautomática")
+)
+
+df_union <- left_join(df_eficiencia, transmisiones, by = "gear")
+print(df_union)
+
+# 6. Transformación de formatos
+df_long <- df_union %>%
+  pivot_longer(cols = c(consumo, potencia, eficiencia), names_to = "medida", values_to = "valor")
+print(df_long)
+
+df_wide <- df_long %>%
+  group_by(cyl, gear, tipo_transmision, medida) %>%
+  summarise(valor = mean(valor), .groups = "drop") %>%
+  pivot_wider(names_from = medida, values_from = valor)
+print(df_wide)
