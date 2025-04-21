@@ -1,0 +1,49 @@
+# Paso 1: Importar las librerías necesarias
+import pandas as pd
+import numpy as np
+
+# Paso 2: Cargar los datos
+ventas_df = pd.read_csv('/workspace/ventas.csv')
+inventarios_df = pd.read_csv('/workspace/inventarios.csv')
+satisfaccion_df = pd.read_csv('/workspace/satisfaccion.csv')
+
+# Paso 3: Limpieza de datos (eliminar filas con valores nulos)
+ventas_df = ventas_df.dropna()
+inventarios_df = inventarios_df.dropna()
+satisfaccion_df = satisfaccion_df.dropna()
+
+# Paso 4: Exploración de datos (Ventas Totales y resumen estadístico)
+ventas_df['Total_Ventas'] = ventas_df['Unidades'] * ventas_df['Precio_unitario']
+print(ventas_df.describe())  # Resumen estadístico de ventas
+
+# Calcular ventas totales por tienda
+ventas_totales = ventas_df.groupby('Tienda')['Total_Ventas'].sum()
+print(ventas_totales)
+
+# Paso 5: Análisis de Inventarios
+inventarios_df['Rotacion_Inventarios'] = inventarios_df['Ventas_totales'] / inventarios_df['Stock_disponible']
+print(inventarios_df[['Tienda', 'Rotacion_Inventarios']])
+
+# Filtrar tiendas con inventarios críticos (<10% de ventas respecto al stock disponible)
+tiendas_criticas = inventarios_df[inventarios_df['Rotacion_Inventarios'] < 0.1]
+print(tiendas_criticas)
+
+# Paso 6: Análisis de satisfacción del cliente
+tiendas_baja_satisfaccion = satisfaccion_df[satisfaccion_df['Satisfaccion'] < 60]
+print(tiendas_baja_satisfaccion)
+
+# Paso 7: Operaciones con Numpy
+# Convertir las ventas totales a un array de Numpy
+ventas_totales_np = ventas_df['Total_Ventas'].to_numpy()
+
+# Calcular mediana y desviación estándar con Numpy
+mediana_ventas = np.median(ventas_totales_np)
+desviacion_estandar_ventas = np.std(ventas_totales_np)
+print(f"Mediana de las ventas: {mediana_ventas}")
+print(f"Desviación estándar de las ventas: {desviacion_estandar_ventas}")
+
+# Simulación de proyecciones de ventas futuras con Numpy
+np.random.seed(42)  # Semilla para resultados reproducibles
+simulacion_ventas = np.random.normal(loc=ventas_totales_np.mean(), scale=ventas_totales_np.std(), size=12)
+print("Simulación de proyecciones de ventas futuras:")
+print(simulacion_ventas)
