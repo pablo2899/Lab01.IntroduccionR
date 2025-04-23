@@ -1,0 +1,58 @@
+import pandas as pd
+
+# 1. Crear el DataFrame a partir de la lista de diccionarios
+data = [
+    {"nombre": "Juan", "edad": 25, "ciudad": "Madrid", "ingresos": 3000},
+    {"nombre": "Ana", "edad": None, "ciudad": None, "ingresos": 2500},
+    {"nombre": "Pedro", "edad": 30, "ciudad": "Barcelona", "ingresos": None},
+    {"nombre": None, "edad": None, "ciudad": "Valencia", "ingresos": None},
+    {"nombre": "Luisa", "edad": 35, "ciudad": "Madrid", "ingresos": None}
+]
+df = pd.DataFrame(data)
+
+# 2. Identificar los valores faltantes
+missing_values = df.isna().sum()
+print("Valores faltantes por columna:\n", missing_values)
+
+# 3. Rellenar los valores faltantes en las columnas numéricas con la media
+df['edad'].fillna(df['edad'].mean(), inplace=True)
+df['ingresos'].fillna(df['ingresos'].mean(), inplace=True)
+
+# 4. Rellenar los valores faltantes en las columnas categóricas con la moda
+df['nombre'].fillna(df['nombre'].mode()[0], inplace=True)
+df['ciudad'].fillna(df['ciudad'].mode()[0], inplace=True)
+
+# 5. Convertir la columna ciudad a variable categórica
+df['ciudad'] = df['ciudad'].astype('category')
+
+# 6. Agregar una nueva fila con una ciudad llamada "Sevilla"
+new_row = pd.DataFrame([{"nombre": "Nuevo", "edad": 40, "ciudad": "Sevilla", "ingresos": 4000}])
+df = pd.concat([df, new_row], ignore_index=True)
+
+# 7. Volver a convertir la columna ciudad a categoría después de agregar la nueva fila
+df['ciudad'] = df['ciudad'].astype('category')
+
+# 8. Verificar las categorías actuales en la columna ciudad
+print("\nCategorías actuales de ciudad:", df['ciudad'].cat.categories)
+
+# 9. Establecer las categorías exactas en la columna ciudad
+df['ciudad'] = df['ciudad'].cat.set_categories(['Madrid', 'Barcelona', 'Valencia', 'Sevilla'])
+
+# 10. Reordenar las categorías en la columna ciudad
+df['ciudad'] = df['ciudad'].cat.reorder_categories(['Madrid', 'Barcelona', 'Valencia', 'Sevilla'])
+
+# 11. Crear el segundo DataFrame
+data_extra = [
+    {"nombre": "Juan", "profesion": "Ingeniero"},
+    {"nombre": "Ana", "profesion": "Médico"},
+    {"nombre": "Pedro", "profesion": "Abogado"},
+    {"nombre": "Luisa", "profesion": "Diseñadora"},
+    {"nombre": "Nuevo", "profesion": "Artista"}
+]
+df_extra = pd.DataFrame(data_extra)
+
+# 12. Realizar un merge entre los DataFrames original y extra
+df_merged = pd.merge(df, df_extra, on="nombre", how="inner", validate="many_to_one")
+
+# 13. Imprimir el DataFrame final resultante
+print("\nDataFrame final después del merge:\n", df_merged)
