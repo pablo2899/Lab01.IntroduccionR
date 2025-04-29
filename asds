@@ -1,0 +1,61 @@
+# Importar las librerías necesarias
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import statsmodels.api as sm
+import numpy as np
+
+# Cargar los datos
+ventas_df = pd.read_csv('/workspace/ventas_peliculas.csv')
+promocion_df = pd.read_csv('/workspace/promocion_peliculas.csv')
+
+# 1. Combinación de los DataFrames con un left join sobre las columnas 'fecha' y 'titulo'
+df = pd.merge(ventas_df, promocion_df, how='left', on=['fecha', 'titulo'], validate='1:m')
+
+# 2. Identificar valores nulos
+print(df.isna().sum())
+
+# 3. Rellenar los valores nulos
+df['eventos_promocionales'] = df['eventos_promocionales'].fillna(0)
+df['participacion_promocion'] = df['participacion_promocion'].fillna(df['participacion_promocion'].mean())
+
+# 4. Visualización de las ventas semanales
+df['fecha'] = pd.to_datetime(df['fecha'])
+df.plot(x='fecha', y='ventas_boletos', kind='line', title='Ventas Semanales de Boletos')
+plt.show()
+
+# 5. Comparación de ventas con y sin eventos promocionales
+df['evento'] = np.where(df['eventos_promocionales'] > 0, 'Con Evento', 'Sin Evento')
+ventas_promocionales = df.groupby('evento')['ventas_boletos'].mean()
+ventas_promocionales.plot(kind='bar', title='Ventas Promedio por Tipo de Semana')
+plt.ylabel('Ventas Promedio')
+plt.show()
+
+# 6. Detección de outliers en las ventas de boletos
+df['ventas_boletos'].plot.box(title='Outliers en Ventas de Boletos')
+plt.show()
+
+# 7. Análisis de correlación
+correlation = df[['ventas_boletos', 'calificacion', 'eventos_promocionales', 'participacion_promocion']].corr(method='pearson')
+print("Correlación de Pearson:")
+print(correlation)
+
+# 8. Modelo de regresión lineal para predecir ventas de boletos
+X = df[['calificacion', 'eventos_promocionales', 'participacion_promocion']]
+X = sm.add_constant(X)  # Añadir constante para la regresión
+y = df['ventas_boletos']
+
+# Entrenar el modelo
+model = sm.OLS(y, X).fit()
+
+# Resumen del modelo
+print(model.summary())
+
+# 9. Predicciones y comparación con valores reales
+y_pred = model.predict(X)
+plt.figure(figsize=(10,6))
+plt.plot(df['fecha'], y, label='Ventas Reales')
+plt.plot(df['fecha'], y_pred, label='Ventas Predichas', linestyle='--')
+plt.title('Comparación de Ventas Reales vs. Ventas Predichas')
+plt.legend()
+plt.show()
