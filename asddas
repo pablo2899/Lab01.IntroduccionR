@@ -1,0 +1,40 @@
+import pandas as pd
+
+# Cargar los datos
+eventos_df = pd.read_csv('/workspace/eventos.csv')
+aficionados_df = pd.read_csv('/workspace/aficionados.csv')
+promociones_df = pd.read_csv('/workspace/promociones.csv')
+
+# Limpieza de datos: eliminar filas con valores nulos
+eventos_df = eventos_df.dropna()
+aficionados_df = aficionados_df.dropna()
+promociones_df = promociones_df.dropna()
+
+# Combinación de los DataFrames utilizando 'id_evento' como clave
+df_combinado = pd.merge(eventos_df, aficionados_df, on='id_evento', how='left')
+df_combinado = pd.merge(df_combinado, promociones_df, on='id_evento', how='left')
+
+# Responder a las preguntas de negocio
+
+# 1. Evento con mayor asistencia total
+evento_mayor_asistencia = df_combinado.loc[df_combinado['asistentes_totales'].idxmax()]
+
+# 2. Rango de edad que asiste más frecuentemente a los eventos
+df_combinado['rango_edad'] = pd.cut(df_combinado['edad'], bins=[0, 18, 35, 50, 100], labels=['0-18', '19-35', '36-50', '51+'])
+rango_edad_mas_frecuente = df_combinado['rango_edad'].value_counts().idxmax()
+
+# 3. Medio publicitario que generó mayor impacto
+df_combinado['impacto_promocion'] = df_combinado['asistentes_totales'] / df_combinado['presupuesto_promocion']
+medio_publicitario_mayor_impacto = df_combinado.groupby('medio_publicitario')['impacto_promocion'].max().idxmax()
+
+# 4. Ubicación de residencia que más aficionados aporta
+ubicacion_residencia_mas_aficionados = df_combinado.groupby('ubicacion_residencia')['id_aficionado'].count().idxmax()
+
+# Exportar el DataFrame final a un archivo CSV
+df_combinado.to_csv('/workspace/reporte_eventos.csv', index=False)
+
+# Imprimir resultados
+print("Evento con mayor asistencia:", evento_mayor_asistencia)
+print("Rango de edad más frecuente:", rango_edad_mas_frecuente)
+print("Medio publicitario con mayor impacto:", medio_publicitario_mayor_impacto)
+print("Ubicación de residencia con más aficionados:", ubicacion_residencia_mas_aficionados)
