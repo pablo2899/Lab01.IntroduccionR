@@ -1,0 +1,48 @@
+# Cargar librerías necesarias
+library(tseries)
+
+# Cargar dataset
+data("AirPassengers")
+
+# Verificar clase y estructura
+print(class(AirPassengers))
+print(summary(AirPassengers))
+print(start(AirPassengers))
+print(end(AirPassengers))
+print(frequency(AirPassengers))
+
+# Visualización inicial
+plot(AirPassengers, main = "Pasajeros aéreos internacionales (1949-1960)", ylab = "Miles de pasajeros", xlab = "Año")
+
+# Estadísticas básicas
+media <- mean(AirPassengers)
+desviacion <- sd(AirPassengers)
+print(paste("Media:", media))
+print(paste("Desviación estándar:", desviacion))
+
+# Descomposición de la serie
+descomp <- decompose(AirPassengers)
+plot(descomp)
+plot(descomp$trend, main = "Tendencia")
+plot(descomp$seasonal, main = "Estacionalidad")
+plot(descomp$random, main = "Componente Aleatorio")
+
+# Análisis de estacionariedad
+acf(AirPassengers, main = "Autocorrelación (ACF)")
+pacf(AirPassengers, main = "Autocorrelación parcial (PACF)")
+adf_test_original <- adf.test(AirPassengers)
+print(adf_test_original)
+
+# Diferenciación si no es estacionaria
+AirPassengers_diff <- diff(AirPassengers)
+plot(AirPassengers_diff, main = "Serie diferenciada")
+acf(AirPassengers_diff, main = "ACF diferenciada")
+pacf(AirPassengers_diff, main = "PACF diferenciada")
+adf_test_diff <- adf.test(AirPassengers_diff)
+print(adf_test_diff)
+
+# Detección de valores atípicos
+boxplot(AirPassengers, main = "Boxplot - Posibles outliers")
+outliers <- boxplot.stats(as.numeric(AirPassengers))$out
+print("Valores atípicos detectados:")
+print(outliers)
